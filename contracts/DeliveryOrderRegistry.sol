@@ -63,9 +63,6 @@ contract DeliveryOrderRegistry {
     returns (address deliveryOrder)
   {
     deliveryOrder = new DeliveryOrder(orders[orderId].destination, msg.sender);
+    deliveryOrder.transfer(orders[orderId].price);
   }
-
-  /*
-   * Internal functions
-   */
 }
