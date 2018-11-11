@@ -1,25 +1,27 @@
 pragma solidity ^0.4.23;
 
-contract DeliveryOrder {
+import './DeliveryOrderRegistry.sol';
+
+contract DeliveryOrderBidder {
   /*
    * Data persistence
    */
   bytes private _destination;
-  address private _owner;
+  address private _registry;
   address private _courier;
   mapping (uint => bytes) public statuses;
   uint public statusCount;
 
   /**
-   * @dev Throws if called by any account other than the owner.
+   * @dev Throws if called by any account other than the registry
    */
-  modifier onlyOwner() {
-    require(isOwner());
+  modifier onlyRegistry() {
+    require(isRegistry());
     _;
   }
 
   /**
-   * @dev Throws if called by any account other than the owner.
+   * @dev Throws if called by any account other than the courier
    */
   modifier onlyCourier() {
     require(isCourier());
@@ -29,25 +31,31 @@ contract DeliveryOrder {
   /**
    * @return true if `msg.sender` is the owner of the contract.
    */
-  function isOwner() public view returns(bool) {
-    return msg.sender == _owner;
+  function isRegistry() public view returns (bool) {
+    return msg.sender == _registry;
   }
 
   /**
    * @return true if `msg.sender` is the owner of the contract.
    */
-  function isCourier() public view returns(bool) {
+  function isCourier() public view returns (bool) {
     return msg.sender == _courier;
   }
 
-  constructor(bytes destination, address courier)
+  constructor(address registry)
     public
   {
-    _destination = destination;
-    _courier = courier;
-    _owner = msg.sender;
+    _registry = registry;
+    _courier = msg.sender;
   }
 
+  function bid(uint orderId, uint price)
+    public
+    onlyCourier
+    returns (bool)
+  {
+    return DeliveryOrderRegistry(_registry).bidForOrder(orderId, price);
+  }
 
   function addStatus(bytes status)
     public
@@ -57,13 +65,16 @@ contract DeliveryOrder {
     statusId = statusCount;
     statuses[statusId] = status;
     statusCount += 1;
+    return statusCount;
   }
 
   function complete()
     public
-    onlyOwner
+    onlyRegistry
+    returns (bool)
   {
     _courier.transfer(address(this).balance);
+    return true;
   }
 
 }

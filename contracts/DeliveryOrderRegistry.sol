@@ -1,5 +1,6 @@
 pragma solidity ^0.4.23;
-import "./DeliveryOrder.sol";
+
+import './DeliveryOrderBidder.sol';
 
 contract DeliveryOrderRegistry {
 
@@ -9,12 +10,18 @@ contract DeliveryOrderRegistry {
   struct Order {
     uint price;
     bytes destination;
-    bool taken;
+  }
+  struct OrderBidder {
+    uint price;
+    uint orderId;
+    address bidder;
   }
 
   address private _owner;
   mapping (uint => Order) public orders;
   uint public orderCount;
+  mapping (uint => OrderBidder) public orderBidders;
+  uint public orderBidderCount;
 
   /*
    * Modifiers
@@ -52,17 +59,41 @@ contract DeliveryOrderRegistry {
     orderId = orderCount;
     orders[orderId] = Order({
       destination: destination,
-      price: price,
-      taken: false
+      price: price
     });
     orderCount += 1;
   }
 
-  function takeOrder(uint orderId)
+  function bidForOrder(uint orderId, uint price)
     public
-    returns (address deliveryOrder)
+    returns (bool)
   {
-    deliveryOrder = new DeliveryOrder(orders[orderId].destination, msg.sender);
-    deliveryOrder.transfer(orders[orderId].price);
+    uint orderBidderId = orderBidderCount;
+    orderBidders[orderBidderId] = OrderBidder({
+      price: price,
+      orderId: orderId,
+      bidder: DeliveryOrderBidder(msg.sender)
+    });
+    orderBidderCount += 1;
+    return true;
+  }
+
+  function awardOrder(uint orderBidderId)
+    public
+    onlyOwner
+    returns (bool)
+  {
+    OrderBidder storage orderBidder = orderBidders[orderBidderId];
+    orderBidder.bidder.transfer(orderBidder.price);
+    return true;
+  }
+
+  function completeOrder(uint orderBidderId)
+    public
+    onlyOwner
+    returns (bool)
+  {
+    OrderBidder storage orderBidder = orderBidders[orderBidderId];
+    return DeliveryOrderBidder(orderBidder.bidder).complete();
   }
 }
