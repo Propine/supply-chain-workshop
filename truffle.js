@@ -23,11 +23,11 @@ module.exports = {
       from: "0x17484326Fc7b21c7cB23F471e87e031052eF3530",
       gas: 1000000
     },
-    ropsten: {
+    rinkeby: {
       host: "52.77.225.127",
       port: 8593,
-      network_id: "3",
-      from: "",
+      network_id: "4",
+      from: "0x476af74013e526879d421d3dc8b4efd1571036ff",
       gas: 4700036,
       gasPrice: 10000000000
     }
