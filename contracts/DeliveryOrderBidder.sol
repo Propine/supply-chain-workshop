@@ -3,6 +3,9 @@ pragma solidity ^0.4.23;
 import './DeliveryOrderRegistry.sol';
 
 contract DeliveryOrderBidder {
+
+  event Deposit(address indexed sender, uint value);
+
   /*
    * Data persistence
    */
@@ -27,6 +30,14 @@ contract DeliveryOrderBidder {
     require(isCourier());
     _;
   }
+
+  function()
+    public
+    payable
+      {
+        if (msg.value > 0)
+          emit Deposit(msg.sender, msg.value);
+      }
 
   /**
    * @return true if `msg.sender` is the owner of the contract.

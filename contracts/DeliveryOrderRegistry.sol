@@ -4,6 +4,8 @@ import './DeliveryOrderBidder.sol';
 
 contract DeliveryOrderRegistry {
 
+  event Deposit(address indexed sender, uint value);
+
   /*
    * Data persistence
    */
@@ -34,6 +36,14 @@ contract DeliveryOrderRegistry {
     require(isOwner());
     _;
   }
+
+  function()
+    public
+    payable
+      {
+        if (msg.value > 0)
+          emit Deposit(msg.sender, msg.value);
+      }
 
   /**
    * @return true if `msg.sender` is the owner of the contract.
