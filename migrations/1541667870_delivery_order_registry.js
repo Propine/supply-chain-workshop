@@ -1,4 +1,11 @@
+const DeliveryOrderRegistry = artifacts.require("DeliveryOrderRegistry.sol");
+const DeliveryOrderBidder = artifacts.require("DeliveryOrderBidder.sol");
 module.exports = function(deployer) {
-  const DeliveryOrderRegistry = artifacts.require("DeliveryOrderRegistry.sol")  ;
-  deployer.deploy(DeliveryOrderRegistry);
+  deployer
+    .then(() => {
+      return deployer.deploy(DeliveryOrderRegistry);
+    })
+    .then(() => {
+      return deployer.deploy(DeliveryOrderBidder, DeliveryOrderRegistry.address);
+    });
 };
